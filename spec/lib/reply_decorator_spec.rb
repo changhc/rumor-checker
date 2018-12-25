@@ -16,6 +16,20 @@ RSpec.describe ReplyDecorator, type: :lib do
                 "reference": "https://www.nownews.com/news/20120801/163961\n網路追追追／吃香蕉好處多　抗高血壓防中風？",
               },
             },
+            {
+              "reply": {
+                "id": "AV19X3c9yCdS-nWhudEI",
+                "text": "Test Reply 1",
+                "type": "RUMOR",
+              },
+            },
+            {
+              "reply": {
+                "id": "AV19X3c9yCdS-nWhudEJ",
+                "text": "Test Reply 2",
+                "type": "OPINIONATED",
+              },
+            },
           ],
         },
       },
@@ -23,12 +37,50 @@ RSpec.describe ReplyDecorator, type: :lib do
   end
 
   let!(:expected_reply) do
-    "這是謠言。\n這是謠言: 香蕉確實含有鉀，適量攝取對於高血壓、預防心血管疾病確實有幫助。不過醫師強調，過量攝取無益處，要真正治本，還是要遵照醫師用藥指示，調整生活作息與改變飲食習慣，才是正確之道。"
+    {
+      type: 'text',
+      text: "👵 部分是謠言。\n---------------\n這是謠言理由🔎:\n 香蕉確實含有鉀，適量攝取對於高血壓、預防心血管疾病確實有幫助。不過醫師強調，過量攝取無益處，要真正治本，還是要遵照醫師用藥指示，調整生活作息與改變飲食習慣，才是正確之道。\n 📖 https://www.nownews.com/news/20120801/163961\n網路追追追／吃香蕉好處多　抗高血壓防中風？ \n---------------\n這是謠言理由🔎:\n Test Reply 1\n ⚠️️ 此回應沒有出處，請自行斟酌回應之可信度。⚠️️ \n---------------\n個人觀點理由🔎:\n Test Reply 2\n ⚠️️ 此回應沒有出處，請自行斟酌回應之可信度。⚠️️ \n---------------\n歡迎成為闢謠編輯，一起查資料幫大家破解謠言！\nhttps://cofacts.g0v.tw/",
+    }
   end
 
   subject { ReplyDecorator.new(replies) }
 
   it 'should return expected conclusion' do
+    expect(subject.prettify).to eq(expected_reply)
+  end
+end
+
+RSpec.describe ReplyDecorator, type: :lib do
+  let!(:replies) do
+    {
+      "data": {
+        "GetArticle": {
+          "id": "AV1OgBQzyCdS-nWhucc-",
+          "text": "驚！99％的人不知道，吃這個水果，才能預防「中風死亡」！轉載一次救人一命！！\nhttp://ezp9.com/p50099.asp",
+          "articleReplies": [
+            {
+              "reply": {
+                "id": "AV19X3c9yCdS-nWhudEH",
+                "text": "香蕉確實含有鉀，適量攝取對於高血壓、預防心血管疾病確實有幫助。不過醫師強調，過量攝取無益處，要真正治本，還是要遵照醫師用藥指示，調整生活作息與改變飲食習慣，才是正確之道。",
+                "type": "OPINIONATED",
+              },
+            },
+          ],
+        },
+      },
+    }.to_json
+  end
+
+  let!(:expected_reply) do
+    {
+      type: 'text',
+      text: "👵 個人觀點。\n---------------\n個人觀點理由🔎:\n 香蕉確實含有鉀，適量攝取對於高血壓、預防心血管疾病確實有幫助。不過醫師強調，過量攝取無益處，要真正治本，還是要遵照醫師用藥指示，調整生活作息與改變飲食習慣，才是正確之道。\n ⚠️️ 此回應沒有出處，此文章亦無其他觀點的回應，請自行斟酌回應之可信度。⚠️️ \n---------------\n歡迎成為闢謠編輯，一起查資料幫大家破解謠言！\nhttps://cofacts.g0v.tw/",
+    }
+  end
+
+  subject { ReplyDecorator.new(replies) }
+
+  it 'should return expected conclusion when there is only one reply with type opinionated' do
     expect(subject.prettify).to eq(expected_reply)
   end
 end

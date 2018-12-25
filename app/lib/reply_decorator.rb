@@ -13,10 +13,10 @@ class ReplyDecorator
   def prettify
     @final_reply << conclusion
     @final_reply += gather_reasons
-
+    reminder = "\n---------------\n歡迎成為闢謠編輯，一起查資料幫大家破解謠言！\nhttps://cofacts.g0v.tw/"
     {
       type: 'text',
-      text: @final_reply.join("\n---------------\n"),
+      text: @final_reply.join("\n---------------\n") + reminder,
     }
   end
 
@@ -36,7 +36,13 @@ class ReplyDecorator
       reference = r['reply']['reference']
 
       reply = "#{RUMOR_TYPES[type]}理由🔎:\n #{reason}"
-      reply += "\n 📖 #{reference} "if reference
+      if reference
+        reply += "\n 📖 #{reference} "
+      elsif type == "OPINIONATED" && @replies.length == 1
+         reply += "\n ⚠️️ 此回應沒有出處，此文章亦無其他觀點的回應，請自行斟酌回應之可信度。⚠️️ "
+      else
+         reply += "\n ⚠️️ 此回應沒有出處，請自行斟酌回應之可信度。⚠️️ "
+      end
       reply
     end
   end
